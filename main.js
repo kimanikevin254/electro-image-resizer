@@ -1,10 +1,12 @@
 const { app, BrowserWindow, Menu } = require('electron')
 const path  = require('path')
+
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createMainWindow()
     }
   })
+
 const isMac = process.platform === 'darwin';
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -25,6 +27,22 @@ function createMainWindow(){
     mainWindow.loadFile(path.join(__dirname, './renderer/index.html'))
 }
 
+// create about window
+function createAboutWindow(){
+    const aboutWindow = new BrowserWindow({
+        title: "About Image Resizer",
+        height: 300,
+        width: isDev ? 1000: 500
+    })
+
+    // open dev tools if in dev env
+    if(isDev){
+        aboutWindow.webContents.openDevTools();
+    }
+
+    aboutWindow.loadFile(path.join(__dirname, './renderer/about.html'))
+}
+
 // App is ready
 app.whenReady().then(() => {
     createMainWindow()
@@ -42,9 +60,25 @@ app.whenReady().then(() => {
 
 // Menu template
 const menu = [
+    ...(isMac ? [{
+        label: app.name,
+        submenu: [
+            {
+                label: 'About',
+                click: createAboutWindow
+            }
+        ]
+    }] : []),
     {
         role: 'fileMenu'
-    }
+    },
+    ...(!isMac ? [{
+        label: 'Help',
+        submenu: [{
+            label: 'About',
+            click: createAboutWindow
+        }]
+    }] : [])
 ]
 
 app.on('window-all-closed', () => {
