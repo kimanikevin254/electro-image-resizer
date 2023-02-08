@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Menu } = require('electron')
 const path  = require('path')
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -9,6 +9,7 @@ const isMac = process.platform === 'darwin';
 
 const isDev = process.env.NODE_ENV !== 'production'
 
+// create main window
 function createMainWindow(){
     const mainWindow = new BrowserWindow({
         title: "Image Resizer",
@@ -24,8 +25,13 @@ function createMainWindow(){
     mainWindow.loadFile(path.join(__dirname, './renderer/index.html'))
 }
 
+// App is ready
 app.whenReady().then(() => {
     createMainWindow()
+
+    // implement menu
+    const mainMenu = Menu.buildFromTemplate(menu)
+    Menu.setApplicationMenu(mainMenu)
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -33,6 +39,13 @@ app.whenReady().then(() => {
         }
       })
 })
+
+// Menu template
+const menu = [
+    {
+        role: 'fileMenu'
+    }
+]
 
 app.on('window-all-closed', () => {
     if (!isMac) {
